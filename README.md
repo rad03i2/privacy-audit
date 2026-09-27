@@ -1,270 +1,267 @@
+<div align="center">
+
+<img src="assets/project-cover.svg" alt="Privacy Audit — local-first privacy scanner by Radwan Abd alhady Ahmed" width="100%" />
+
+<br/>
+
+<img src="assets/project-logo.svg" alt="Privacy Audit logo" width="104" />
+
 # Privacy Audit
 
-A dependency-free, local-first Python tool that scans text files and source trees for privacy-sensitive material **without uploading or modifying your data**.
+**A dependency-free, read-only privacy scanner for source trees and text files.**
 
-[العربية](#العربية) · [Installation](#installation) · [Usage](#usage) · [Security](#security--privacy)
+<div dir="rtl">
+<strong>أداة محلية للقراءة فقط تساعدك على اكتشاف مؤشرات البيانات الحساسة قبل مشاركة الملفات أو نشر المستودع.</strong>
+</div>
 
-## Overview
+<br/>
 
-Privacy Audit helps developers catch accidental exposure before sharing a folder, publishing a repository, or attaching files. It performs conservative, explainable pattern checks and reports the file, line, severity, rule, and a redacted excerpt.
+[![CI](https://github.com/rad03i2/privacy-audit/actions/workflows/ci.yml/badge.svg)](https://github.com/rad03i2/privacy-audit/actions/workflows/ci.yml)
+![Python](https://img.shields.io/badge/Python-3.10%2B-8B5CF6?logo=python&logoColor=white)
+![Version](https://img.shields.io/badge/version-1.0.0-10101E)
+![Runtime dependencies](https://img.shields.io/badge/runtime_dependencies-0-47E0D0)
+![License](https://img.shields.io/badge/license-MIT-FF6B8A)
 
-### Why it exists
+**[English guide](README_EN.md) · [الدليل العربي](README_AR.md) · [Architecture](docs/ARCHITECTURE.md) · [Brand](docs/BRAND.md) · [Security](SECURITY.md)**
 
-Simple pre-publication checks should not require sending potentially sensitive files to a third party. Privacy Audit runs locally, is read-only, follows no symbolic links, and has no runtime dependencies or telemetry.
+</div>
 
-## Key features
+---
 
-- Recursively scans UTF-8/UTF-8-BOM text files or one file.
-- Detects possible email addresses, IPv4 addresses, private-key headers, AWS-style access-key IDs, GitHub-style tokens, and generic embedded credentials.
-- `low`, `medium`, and `high` severities with explainable rule names.
-- Redacts excerpts so a full detected credential is not echoed to output.
-- Skips binary, undecodable, oversized, generated/dependency directories, and symbolic links.
-- Human-readable and JSON output.
-- CI-friendly `--fail-on low|medium|high` threshold.
-- Python API plus `privacy-audit` and `python -m privacy_audit` entry points.
-- No network calls, API keys, accounts, telemetry, or runtime packages.
+## Review locally before you publish
 
-## Preview
+Privacy Audit scans UTF-8 text locally and reports **review signals** for material that may deserve attention before a folder, repository, or text file is shared.
 
-```text
-$ privacy-audit ./project
-Scanned: 18 | Skipped: 2 | Findings: 1
-[LOW   ] project/config.txt:4 email — Possible email address — owne…com
-```
+<table>
+<tr>
+<td width="33%"><strong>Local by design</strong><br/><sub>The scanner reads files on your machine and contains no runtime network client, account flow, telemetry, or API-key requirement.</sub></td>
+<td width="33%"><strong>Explainable findings</strong><br/><sub>Each finding includes a rule, severity, file path, line number, description, and a deliberately redacted excerpt.</sub></td>
+<td width="33%"><strong>CI-friendly</strong><br/><sub>Use JSON output or <code>--fail-on</code> thresholds to add a lightweight pre-publication gate to scripts and CI.</sub></td>
+</tr>
+</table>
 
-The example is illustrative. Exact paths and counts depend on the scanned content.
+Privacy Audit is intentionally conservative: it helps surface suspicious patterns, but it does **not** claim that every finding is a real secret or that a clean scan proves a project is private-data free.
 
-## Requirements
+## What it detects today
 
-- Python 3.10+
-- Windows, macOS, or Linux
+| Rule | Severity | What it flags |
+|---|---:|---|
+| `email` | Low | Possible email addresses |
+| `ipv4` | Low | IPv4 addresses |
+| `generic-secret` | Medium | Credential-like assignments such as API keys, passwords, secrets, or tokens |
+| `private-key` | High | Private-key headers |
+| `aws-access-key` | High | AWS-style access-key identifiers |
+| `github-token` | High | GitHub-style token patterns |
 
-## Installation
+Findings are heuristic. Rule names and severities are signals for review rather than proof of compromise or identity.
 
-From a clone:
+## 30-second start
+
+**Requirement:** Python 3.10 or newer.
 
 ```bash
 git clone https://github.com/rad03i2/privacy-audit.git
 cd privacy-audit
 python -m pip install .
+privacy-audit --version
 ```
 
-For development:
-
-```bash
-python -m pip install -e .
-```
-
-## Usage
-
-Scan a directory:
+Scan a project:
 
 ```bash
 privacy-audit ./project
 ```
 
-Scan one file and emit JSON:
+Machine-readable output:
 
 ```bash
-privacy-audit notes.txt --json
+privacy-audit ./project --json
 ```
 
-Fail CI when medium-or-higher findings exist:
+Fail a CI step when a medium-or-higher finding exists:
 
 ```bash
 privacy-audit . --fail-on medium
 ```
 
-Limit inspected file size (bytes):
+## Scan flow
 
-```bash
-privacy-audit . --max-bytes 500000
+```text
+file / source tree
+       │
+       ▼
+local traversal
+       │
+       ├── skip symlinks
+       ├── skip common generated/dependency dirs
+       └── enforce max file size
+       │
+       ▼
+text boundary
+       │
+       ├── skip likely binary files
+       └── decode UTF-8 / UTF-8 BOM
+       │
+       ▼
+conservative pattern rules
+       │
+       ▼
+finding + severity + redacted excerpt
+       │
+       ├── terminal output
+       └── JSON output / CI threshold
 ```
 
-Exit codes: `0` means the scan completed and the configured threshold was not reached; `1` means invalid input/read failure; `2` means `--fail-on` was reached.
+## CLI reference
 
-### Python API
+| Command / flag | Behavior |
+|---|---|
+| `privacy-audit PATH` | Scan one file or a directory tree |
+| `--json` | Emit summary and findings as JSON |
+| `--max-bytes N` | Change the per-file inspection ceiling |
+| `--fail-on low\|medium\|high` | Exit 2 when a finding reaches that severity or higher |
+| `--version` | Print the installed version |
+
+Default maximum file size: **2,000,000 bytes**.
+
+Exit codes:
+
+| Code | Meaning |
+|---:|---|
+| `0` | Scan completed and the configured threshold was not reached |
+| `1` | Invalid target or read-related input failure |
+| `2` | The configured `--fail-on` threshold was reached |
+
+## What the scanner skips
+
+Privacy Audit deliberately avoids pretending to understand content outside its current text boundary.
+
+It skips or does not inspect:
+
+- symbolic-link targets;
+- files above the configured size ceiling;
+- likely binary files containing a NUL byte near the start;
+- files that cannot be decoded as UTF-8 / UTF-8 BOM;
+- common generated/dependency directories including `.git`, `.venv`, `venv`, `node_modules`, `dist`, `build`, and `__pycache__`.
+
+## Python API
 
 ```python
 from privacy_audit import scan_path, scan_text
 
 findings, summary = scan_path("./project")
+
 for finding in findings:
     print(finding.rule, finding.severity, finding.path, finding.line)
 
 inline = scan_text("Contact: person@example.com")
 ```
 
-## Configuration
+The public API exports `Finding`, `scan_path`, and `scan_text`.
 
-No environment variables or configuration file are required. Behavior is controlled by CLI flags. The default per-file limit is 2,000,000 bytes. Common dependency/build directories such as `.git`, `.venv`, `node_modules`, `dist`, and `build` are skipped.
+## Privacy and safety boundary
 
-## Project structure
+The implementation is read-only and local:
+
+- no scanned file is modified;
+- no symbolic-link target is followed;
+- no network request is required by the scanner;
+- no account, API key, or `.env` configuration is required;
+- scanned content is not intentionally persisted by the tool.
+
+However, **reports can still be sensitive** because paths, rule names, and even redacted context can reveal useful information. Treat scan output as review material, not as something to publish automatically.
+
+Read [SECURITY.md](SECURITY.md) for the complete boundary.
+
+## Tests and CI
+
+Run the same checks used by the repository:
+
+```bash
+python -m compileall -q src tests
+python -m unittest discover -s tests -v
+privacy-audit --version
+```
+
+GitHub Actions currently runs those checks on:
+
+| Operating system | Python |
+|---|---|
+| Ubuntu | 3.10 · 3.12 · 3.13 |
+| Windows | 3.10 · 3.12 · 3.13 |
+| macOS | 3.10 · 3.12 · 3.13 |
+
+The test suite covers redaction, email/private-key detection, UTF-8 input, binary skipping, file-size limits, invalid targets, and CLI severity thresholds.
+
+## Current limitations
+
+Privacy Audit is a **heuristic pre-publication aid**. It is not a DLP system, secret manager, malware scanner, privacy certification, or compliance engine.
+
+The current implementation does not inspect:
+
+- archives;
+- images;
+- PDF files as documents;
+- Office formats;
+- Git history;
+- remote repositories or cloud services;
+- semantic meaning beyond the implemented text patterns.
+
+False positives and false negatives are possible. A scan with zero findings is **not proof** that the content contains no sensitive information.
+
+Future ideas live in [ROADMAP.md](ROADMAP.md) and are kept separate from current capabilities.
+
+## Repository map
 
 ```text
 privacy-audit/
+├── assets/
+│   ├── project-cover.svg
+│   └── project-logo.svg
+├── docs/
+│   ├── ARCHITECTURE.md
+│   └── BRAND.md
 ├── src/privacy_audit/
 │   ├── __init__.py
 │   ├── __main__.py
 │   ├── cli.py
 │   └── scanner.py
-├── tests/test_scanner.py
-├── .github/workflows/ci.yml
-├── pyproject.toml
-├── CONTRIBUTING.md
+├── tests/
+│   └── test_scanner.py
+├── .github/
+│   ├── ISSUE_TEMPLATE/
+│   ├── PULL_REQUEST_TEMPLATE.md
+│   └── workflows/ci.yml
+├── README_EN.md
+├── README_AR.md
+├── ROADMAP.md
+├── CHANGELOG.md
 ├── SECURITY.md
+├── CONTRIBUTING.md
 └── LICENSE
 ```
 
-## Testing
+## Documentation
 
-```bash
-python -m compileall -q src tests
-python -m unittest discover -s tests -v
-```
-
-GitHub Actions runs the package on Ubuntu, Windows, and macOS with Python 3.10, 3.12, and 3.13.
-
-## Security & privacy
-
-The scanner reads local files only. It does not modify them, access the network, follow symbolic links, or intentionally persist scanned content. Output itself may still reveal that sensitive material exists, so treat reports as sensitive. See [SECURITY.md](SECURITY.md).
-
-## Limitations
-
-Privacy Audit is a heuristic pre-publication aid, **not** a DLP platform, secret manager, malware scanner, or compliance certification tool. Pattern matching can produce false positives and false negatives. It does not inspect binary formats, archives, images, PDFs, office documents, git history, or remote services. A clean report is not proof that content contains no personal or secret information.
-
-## Optional roadmap
-
-Possible future work includes opt-in custom rules, ignore files, SARIF export, and additional structured-text detectors. These are not required for the current scanner to work end-to-end.
-
-## Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md). Never use real credentials or personal information in tests or issues.
-
-## License
-
-MIT License — see [LICENSE](LICENSE).
-
-## Author
-
-**Radwan Abdulhadi Ahmed**  
-**رضوان عبدالهادي أحمد**  
-GitHub: **@rad03i2**
+| Document | Purpose |
+|---|---|
+| [README_EN.md](README_EN.md) | Complete English guide |
+| [README_AR.md](README_AR.md) | الدليل العربي الكامل |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Scanner flow, rules, boundaries, and exit behavior |
+| [docs/BRAND.md](docs/BRAND.md) | Visual identity and asset rules |
+| [SECURITY.md](SECURITY.md) | Privacy/security model and reporting |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | Contribution rules and test expectations |
+| [ROADMAP.md](ROADMAP.md) | Clearly labeled future ideas |
+| [CHANGELOG.md](CHANGELOG.md) | Notable project changes |
 
 ---
 
-# العربية
+<div align="center">
 
-## نظرة عامة
+### Built by رضوان عبدالهادي
 
-**Privacy Audit** أداة Python محلية وخفيفة لفحص الملفات النصية ومجلدات الشيفرة بحثًا عن مؤشرات قد تكشف معلومات حساسة قبل مشاركة الملفات أو نشر المستودع. تعمل الأداة على جهازك فقط، ولا ترفع البيانات ولا تعدّل الملفات.
+**Radwan Abd alhady Ahmed · [@rad03i2](https://github.com/rad03i2)**
 
-### لماذا هذا المشروع؟
+<sub>Inspect locally. Redact deliberately. Publish with more context.</sub>
 
-قد يحتوي مشروع جاهز للنشر دون قصد على بريد إلكتروني أو عنوان IP أو مفتاح خاص أو رمز وصول. الهدف هو توفير فحص أولي واضح وقابل للتفسير من دون إرسال الملفات الحساسة إلى خدمة خارجية.
-
-## الميزات الرئيسية
-
-- فحص ملف واحد أو مجلد كامل بصورة تكرارية.
-- دعم UTF-8 وUTF-8 BOM، بما في ذلك النص العربي.
-- كشف مؤشرات البريد الإلكتروني وIPv4 ورؤوس المفاتيح الخاصة ومعرّفات مفاتيح AWS وأنماط رموز GitHub والبيانات السرية العامة.
-- مستويات خطورة `low` و`medium` و`high`.
-- إظهار الملف ورقم السطر والقاعدة مع مقتطف مخفي جزئيًا بدل طباعة السر كاملًا.
-- تجاهل الملفات الثنائية وغير القابلة لفك UTF-8 والملفات الكبيرة والروابط الرمزية ومجلدات الاعتماد والبناء الشائعة.
-- إخراج نصي أو JSON وخيار `--fail-on` المناسب للتكامل المستمر.
-- واجهة Python برمجية وCLI.
-- لا اتصالات شبكة ولا مفاتيح API ولا تتبع ولا حزم تشغيل خارجية.
-
-## المعاينة
-
-```text
-privacy-audit ./project
-Scanned: 18 | Skipped: 2 | Findings: 1
-```
-
-الأرقام أعلاه توضيحية فقط؛ النتيجة الفعلية تعتمد على الملفات التي تفحصها.
-
-## المتطلبات والتثبيت
-
-تحتاج Python 3.10 أو أحدث على Windows أو macOS أو Linux:
-
-```bash
-git clone https://github.com/rad03i2/privacy-audit.git
-cd privacy-audit
-python -m pip install .
-```
-
-وللتطوير:
-
-```bash
-python -m pip install -e .
-```
-
-## الاستخدام
-
-```bash
-privacy-audit ./project
-privacy-audit notes.txt --json
-privacy-audit . --fail-on medium
-privacy-audit . --max-bytes 500000
-```
-
-يمكن أيضًا التشغيل هكذا:
-
-```bash
-python -m privacy_audit ./project
-```
-
-رمز الخروج `0` يعني اكتمال الفحص دون بلوغ حد الفشل المحدد، و`1` لخطأ الإدخال/القراءة، و`2` عند بلوغ مستوى `--fail-on`.
-
-### واجهة Python
-
-```python
-from privacy_audit import scan_path
-
-findings, summary = scan_path("./project")
-print(summary)
-```
-
-## الإعداد
-
-لا يحتاج المشروع ملف `.env` أو متغيرات بيئة. الحد الافتراضي لحجم الملف المفحوص هو 2,000,000 بايت، ويمكن تغييره من CLI. يتم تجاهل مجلدات شائعة مثل `.git` و`.venv` و`node_modules` و`dist` و`build`.
-
-## بنية المشروع
-
-الشيفرة الفعلية داخل `src/privacy_audit/`، والاختبارات داخل `tests/`، وإعداد CI داخل `.github/workflows/ci.yml`، وبيانات الحزمة في `pyproject.toml`.
-
-## الاختبارات
-
-```bash
-python -m compileall -q src tests
-python -m unittest discover -s tests -v
-```
-
-إعداد GitHub Actions يشغّل الاختبارات على Ubuntu وWindows وmacOS مع عدة إصدارات من Python.
-
-## الأمان والخصوصية
-
-الأداة للقراءة فقط: لا تعدّل الملفات، ولا تتصل بالإنترنت، ولا تتبع الروابط الرمزية، ولا تحفظ محتوى الملفات عمدًا. مع ذلك قد يكشف تقرير النتائج وجود بيانات حساسة، لذلك يجب التعامل معه بحذر. راجع [SECURITY.md](SECURITY.md).
-
-## القيود
-
-هذه الأداة فحص استدلالي أولي وليست نظام DLP أو مدير أسرار أو ماسح برمجيات خبيثة أو إثبات امتثال. قد تظهر نتائج إيجابية أو سلبية خاطئة. لا تفحص حاليًا الملفات الثنائية أو الأرشيفات أو الصور أو PDF أو مستندات Office أو تاريخ Git. النتيجة النظيفة لا تضمن خلو المحتوى من كل البيانات الحساسة.
-
-## تطوير اختياري مستقبلًا
-
-يمكن مستقبلًا إضافة قواعد مخصصة اختيارية، وملف تجاهل، وتصدير SARIF، وكواشف إضافية للنصوص المنظمة. الوظائف الحالية لا تعتمد على هذه الإضافات.
-
-## المساهمة
-
-راجع [CONTRIBUTING.md](CONTRIBUTING.md)، ولا تستخدم بيانات شخصية أو أسرارًا حقيقية في الاختبارات أو البلاغات.
-
-## الترخيص
-
-المشروع مرخص بترخيص MIT. راجع [LICENSE](LICENSE).
-
-## المؤلف
-
-**Radwan Abdulhadi Ahmed**  
-**رضوان عبدالهادي أحمد**  
-GitHub: **@rad03i2**
+</div>

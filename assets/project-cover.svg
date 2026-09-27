@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="720" viewBox="0 0 1600 720" role="img" aria-labelledby="title desc">
+  <title id="title">Privacy Audit project identity cover</title>
+  <desc id="desc">A dark privacy auditing interface with a scanning lens, redacted text bars, and local-first privacy signals.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#080A12"/>
+      <stop offset=".58" stop-color="#101020"/>
+      <stop offset="1" stop-color="#151127"/>
+    </linearGradient>
+    <linearGradient id="lens" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#9B7BFF"/>
+      <stop offset="1" stop-color="#47E0D0"/>
+    </linearGradient>
+    <radialGradient id="glow">
+      <stop offset="0" stop-color="#8B5CF6" stop-opacity=".22"/>
+      <stop offset="1" stop-color="#8B5CF6" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0H0V40" fill="none" stroke="#2A2840" stroke-width="1" opacity=".34"/>
+    </pattern>
+    <filter id="blur" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="24"/>
+    </filter>
+  </defs>
+
+  <rect width="1600" height="720" rx="34" fill="url(#bg)"/>
+  <rect width="1600" height="720" rx="34" fill="url(#grid)" opacity=".52"/>
+  <circle cx="1304" cy="248" r="288" fill="url(#glow)"/>
+  <circle cx="1406" cy="580" r="145" fill="#47E0D0" opacity=".055" filter="url(#blur)"/>
+
+  <g font-family="Inter, Segoe UI, Arial, sans-serif">
+    <text x="118" y="150" fill="#47E0D0" font-size="24" font-weight="700" letter-spacing="5">LOCAL-FIRST PRIVACY REVIEW</text>
+    <text x="112" y="270" fill="#F4F2FA" font-size="86" font-weight="800" letter-spacing="-2">Privacy Audit</text>
+    <text x="118" y="334" fill="#B9B6C9" font-size="30" font-weight="500">Scan before you share. Keep sensitive data on your machine.</text>
+
+    <g transform="translate(118 410)">
+      <rect width="220" height="56" rx="28" fill="#171629" stroke="#8B5CF6" stroke-width="2"/>
+      <circle cx="31" cy="28" r="9" fill="#9B7BFF"/>
+      <text x="54" y="36" fill="#E8E5F0" font-size="21" font-weight="650">READ-ONLY</text>
+
+      <rect x="238" width="216" height="56" rx="28" fill="#111E20" stroke="#47E0D0" stroke-width="2"/>
+      <circle cx="269" cy="28" r="9" fill="#47E0D0"/>
+      <text x="292" y="36" fill="#DDF9F5" font-size="21" font-weight="650">NO NETWORK</text>
+
+      <rect x="472" width="218" height="56" rx="28" fill="#21151E" stroke="#FF6B8A" stroke-width="2"/>
+      <circle cx="503" cy="28" r="9" fill="#FF6B8A"/>
+      <text x="526" y="36" fill="#F9E5EB" font-size="21" font-weight="650">REDACTED</text>
+    </g>
+
+    <path d="M118 526H704" stroke="#343047" stroke-width="2"/>
+    <text x="118" y="580" fill="#E2DFF0" font-size="24" font-weight="650">A Radwan Abd alhady Project</text>
+    <text x="118" y="624" fill="#9C98B0" font-size="24">رضوان عبدالهادي</text>
+    <text x="118" y="660" fill="#6F6A84" font-size="18">Explainable signals • Local inspection • Safer publishing</text>
+  </g>
+
+  <g transform="translate(1040 116)">
+    <rect x="0" y="42" width="410" height="384" rx="32" fill="#0E0E1B" stroke="#28263A" stroke-width="2"/>
+    <rect x="34" y="82" width="180" height="12" rx="6" fill="#4A465E"/>
+    <rect x="34" y="116" width="278" height="12" rx="6" fill="#302E42"/>
+    <rect x="34" y="150" width="94" height="12" rx="6" fill="#FF6B8A"/>
+    <rect x="140" y="150" width="156" height="12" rx="6" fill="#302E42"/>
+    <rect x="34" y="184" width="242" height="12" rx="6" fill="#302E42"/>
+    <rect x="34" y="218" width="132" height="12" rx="6" fill="#302E42"/>
+    <rect x="178" y="218" width="154" height="12" rx="6" fill="#FF6B8A"/>
+    <rect x="34" y="252" width="310" height="12" rx="6" fill="#302E42"/>
+    <rect x="34" y="286" width="104" height="12" rx="6" fill="#47E0D0"/>
+    <rect x="150" y="286" width="122" height="12" rx="6" fill="#302E42"/>
+    <rect x="34" y="320" width="244" height="12" rx="6" fill="#302E42"/>
+
+    <circle cx="288" cy="224" r="116" fill="#121225" fill-opacity=".82" stroke="url(#lens)" stroke-width="12"/>
+    <circle cx="288" cy="224" r="88" fill="#8B5CF6" opacity=".05"/>
+    <path d="M371 307 430 366" stroke="url(#lens)" stroke-width="22" stroke-linecap="round"/>
+    <path d="M244 214h88" stroke="#FF6B8A" stroke-width="14" stroke-linecap="round"/>
+    <path d="M250 248h64" stroke="#47E0D0" stroke-width="10" stroke-linecap="round"/>
+    <path d="M249 180h48" stroke="#A8A3BB" stroke-width="10" stroke-linecap="round" opacity=".7"/>
+    <circle cx="386" cy="86" r="8" fill="#47E0D0"/>
+    <circle cx="360" cy="86" r="8" fill="#8B5CF6"/>
+  </g>
+</svg>
